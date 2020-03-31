@@ -169,7 +169,6 @@ def eval_batch(net,epoch,loader):
         correct += compare_str_list(gt_list, predict_labels)
         total_count += len(gt_list)
     return float(correct)/total_count
-    #print("epoch: {}, eval acc: {}".format(epoch, float(correct)/total_count))
 
 def main():
     if config.resume_model:
@@ -180,6 +179,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # resume_model(net,args.resume_model)
-    # eval(net,0)
-    # eval_batch(net,0, test_loader_batch)
