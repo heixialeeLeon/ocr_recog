@@ -1,4 +1,6 @@
+import torch
 from utils.alphabets import Alphabets
+from torch.autograd import Variable
 
 class TensorProcess(object):
     def __init__(self, alphabets):
@@ -34,3 +36,30 @@ def compare_str_list(label_a, label_b):
         if label_a[index] == label_b[index]:
             correct_count +=1
     return correct_count
+
+class averager(object):
+    """Compute average for `torch.Variable` and `torch.Tensor`. """
+
+    def __init__(self):
+        self.reset()
+
+    def add(self, v):
+        if isinstance(v, Variable):
+            count = v.data.numel()
+            v = v.data.sum()
+        elif isinstance(v, torch.Tensor):
+            count = v.numel()
+            v = v.sum()
+
+        self.n_count += count
+        self.sum += v
+
+    def reset(self):
+        self.n_count = 0
+        self.sum = 0
+
+    def val(self):
+        res = 0
+        if self.n_count != 0:
+            res = self.sum / float(self.n_count)
+        return res

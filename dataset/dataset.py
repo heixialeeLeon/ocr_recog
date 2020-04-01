@@ -24,7 +24,8 @@ class DatasetFromFolder(Dataset):
 
     def __getitem__(self, index):
         target = str(self.image_filenames[index])
-        target = target.split('/')[-1].split('_')[0]
+        #target = target.split('/')[-1].split('_')[0]
+        target = target.split('/')[-1].split('.')[0].split('_')[0]
         image = cv2.imread(str(self.image_filenames[index]))
         image = cv2.resize(image,self.size)
         image = input_transform(image)
@@ -71,7 +72,8 @@ train_dataset = DatasetFromFolder(config.train_folder)
 test_dataset = DatasetFromFolder(config.test_folder)
 
 if __name__ == "__main__":
-    train_loader = DataLoader(dataset=train_dataset, num_workers=4, batch_size=8, shuffle=False, collate_fn=default_collate_fn)
+    dataset = DatasetFromFolder("/data/captcha/huahang/huahang_1174")
+    train_loader = DataLoader(dataset=dataset, num_workers=4, batch_size=8, shuffle=True, collate_fn=default_collate_fn)
     for data, label, label_length in train_loader:
         images = [item for item in data[:, ]]
         CV2_showTensors_unsqueeze(images)
