@@ -84,6 +84,7 @@ def init_weights(m):
 
 if __name__ == "__main__":
     crnn = VGG16_CRNN(3200)
-    x = torch.zeros(8, 1, 32, 160)
+    # x = torch.zeros(8, 1, 32, 160)
+    x = torch.zeros(8, 1, 20, 200)
     output = crnn(x)
     print(output.size())

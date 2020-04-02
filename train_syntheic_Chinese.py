@@ -135,7 +135,7 @@ def train_epoch(net, epoch):
             gt = label.view(-1).detach().cpu().numpy()
             gt = alphabets.encode(gt)
             gt_list = list()
-            step = 4
+            step = 10
             for index in range(len(label_length)):
                 gt_list.append(gt[index*step:(index+1)*step])
             predict_labels = tensor_process.post_process_batch(outputs)
@@ -177,7 +177,7 @@ def eval_batch(net,epoch,loader):
         gt = label.view(-1).detach().cpu().numpy()
         gt = alphabets.encode(gt)
         gt_list = list()
-        step = 4
+        step = 10
         for index in range(len(label_length)):
             gt_list.append(gt[index * step:(index + 1) * step])
         correct += compare_str_list(gt_list, predict_labels)
@@ -192,4 +192,7 @@ def main():
     train_epoch(net,config.epoch)
 
 if __name__ == "__main__":
-    main()
+    #main()
+    resume_model(net, config.resume_model)
+    #eval(net,0)
+    eval_batch(net,0,test_loader_batch)

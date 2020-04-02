@@ -4,12 +4,12 @@ from torch import optim
 from torch.autograd import Variable
 import math
 
-class Simple_CNN(nn.Module):
+class Cell_CNN(nn.Module):
     def __init__(self, input_channels):
-        super(Simple_CNN,self).__init__()
+        super(Cell_CNN,self).__init__()
         self.input_channels = input_channels
         self.conv1 = nn.Sequential(
-            nn.Conv2d(in_channels=self.input_channels, out_channels=32, kernel_size=2, stride=2),
+            nn.Conv2d(in_channels=self.input_channels, out_channels=32, kernel_size=(2,4), stride=(2,2)),
             nn.BatchNorm2d(32),
             nn.LeakyReLU(0.1),
             nn.MaxPool2d(kernel_size=2, stride=1)
@@ -20,7 +20,7 @@ class Simple_CNN(nn.Module):
             nn.Conv2d(in_channels=32, out_channels=64, kernel_size=2, stride=1),
             nn.BatchNorm2d(64),
             nn.LeakyReLU(0.1),
-            nn.MaxPool2d(kernel_size=2, stride=2)
+            nn.MaxPool2d(kernel_size=2, stride=(1,2))
         )
         self.conv3 = nn.Sequential(
             nn.Conv2d(in_channels=64, out_channels=128, kernel_size=2, stride=1),
@@ -31,15 +31,19 @@ class Simple_CNN(nn.Module):
 
     def forward(self, x):
         b, channel, h, w = x.size()
+        # print(x.shape)
         x = self.conv1(x)
+        # print(x.shape)
         x = self.conv2(x)
+        # print(x.shape)
         x = self.conv3(x)
+        # print(x.shape)
         # print(x.size())
         return x
 
-class Simple_RNN(nn.Module):
+class Cell_RNN(nn.Module):
     def __init__(self, class_num, hidden_unit):
-        super(Simple_RNN, self).__init__()
+        super(Cell_RNN, self).__init__()
         self.Bidirectional_LSTM1 = torch.nn.LSTM(128, hidden_unit, bidirectional=True)
         self.embedding1 = torch.nn.Linear(hidden_unit * 2, 128)
         self.Bidirectional_LSTM2 = torch.nn.LSTM(128, hidden_unit, bidirectional=True)
@@ -56,11 +60,11 @@ class Simple_RNN(nn.Module):
         x = x.view(T, b, -1)
         return x  # [16,b,class_num]
 
-class Simple_CRNN(nn.Module):
+class Cell_CRNN(nn.Module):
     def __init__(self, class_num, input_channels=3, hidden_unit=128):
-        super(Simple_CRNN, self).__init__()
-        self.cnn = Simple_CNN(input_channels)
-        self.rnn = Simple_RNN(class_num, hidden_unit)
+        super(Cell_CRNN, self).__init__()
+        self.cnn = Cell_CNN(input_channels)
+        self.rnn = Cell_RNN(class_num, hidden_unit)
 
     def forward(self, x):
         x = self.cnn(x)
@@ -81,13 +85,7 @@ def init_weights(m):
         m.bias.data.zero_()
 
 if __name__ == '__main__':
-    crnn = Simple_CRNN(63)
-    x = torch.zeros(8, 3, 20, 200)
-    # x = torch.zeros(8, 3, 53, 150)
-    output = crnn(x)
-    print(output.size())
-
-    crnn = Simple_CRNN(63,1)
-    x = torch.zeros(1, 1, 53, 150)
+    crnn = Cell_CRNN(63)
+    x = torch.zeros(8, 3, 40, 400)
     output = crnn(x)
     print(output.size())

@@ -7,8 +7,8 @@ train_test_rate = 0.9
 image_input_size = (150,53)
 
 #resume_model ='checkpoint/recog_v2.pth'
-resume_model ='checkpoint/recog_epoch_700.pth'
-#resume_model =''
+#resume_model ='checkpoint/recog_epoch_700.pth'
+resume_model =''
 
 #trainning parameters
 epoch = 800

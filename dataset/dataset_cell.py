@@ -7,7 +7,7 @@ from utils.alphabets import Alphabets
 from utils.img_show import *
 from utils.file_utils import get_file_list
 from utils.list_utils import split_with_shuffle
-import configs as config
+import config.config_cell as config
 
 input_transform = Compose([
 	ToTensor(),
@@ -24,10 +24,14 @@ class DatasetFromFolder(Dataset):
 
     def __getitem__(self, index):
         target = str(self.image_filenames[index])
-        #target = target.split('/')[-1].split('_')[0]
-        target = target.split('/')[-1].split('.')[0].split('_')[0]
-        image = cv2.imread(str(self.image_filenames[index]))
+        target = target.split('/')[-1]
+        target = target.split('.')[0]
+        target = target.replace('$','/')
+        image = cv2.imread(str(self.image_filenames[index]),0)
         image = cv2.resize(image,self.size)
+        h,w = image.shape
+        w = int(w * 0.6)
+        image = image[:,:w]
         image = input_transform(image)
         #image = self.transform(Image.open(self.image_filenames[index]))
         target = torch.tensor(self.alphabets.decode(target))
@@ -72,11 +76,11 @@ def default_collate_fn(batch):
 # test_dataset = DatasetFromFolder(config.test_folder)
 
 if __name__ == "__main__":
-    dataset = DatasetFromFolder("/data/captcha/train_total")
-    train_loader = DataLoader(dataset=dataset, num_workers=4, batch_size=8, shuffle=True, collate_fn=default_collate_fn)
+    dataset = DatasetFromFolder("/home/peizhao/data/work/cell/cell_train")
+    train_loader = DataLoader(dataset=dataset, num_workers=4, batch_size=16, shuffle=True, collate_fn=default_collate_fn)
     for data, label, label_length in train_loader:
         images = [item for item in data[:, ]]
-        CV2_showTensors_unsqueeze(images)
+        CV2_showTensors_unsqueeze_gray(images,direction=1)
         # print(data.shape)
-        # print(label.shape)
-        # print(label_length)
+        print(label.shape)
+        print(label_length)

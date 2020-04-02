@@ -11,20 +11,23 @@ import torchvision
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
-from dataset.dataset import *
-from models.simple_crnn import Simple_CRNN, init_weights
+from dataset.dataset_cell import *
+from models.cell_rcnn import Cell_CRNN, init_weights
+from models.simple_crnn import Simple_CRNN
+from models.vgg16_crnn import VGG16_CRNN
 from utils.alphabets import Alphabets
 from utils.tensor_utils import *
 from utils.train_utils import *
-import configs as config
-#import config.config_total as config
+#import configs as config
+import config.config_cell as config
+import random
 
 
 parser = argparse.ArgumentParser(description='Train Super Resolution Models')
 # training parameters
 # parser.add_argument("--image_size", type=int, default=256,help="training patch size")
 parser.add_argument("--data_dir", type=str, default="/data/captcha/330/train",help="data dir location")
-parser.add_argument("--batch_size", type=int, default=32,help="batch size")
+parser.add_argument("--batch_size", type=int, default=8,help="batch size")
 parser.add_argument("--epochs", type=int, default=300,help="number of epochs")
 parser.add_argument("--save_per_epoch", type=int, default=50,help="number of epochs")
 parser.add_argument("--lr", type=float, default=0.001, help="learning rate")
@@ -50,7 +53,7 @@ def save_model_as(model, model_name):
 
 def save_model(model,epoch):
     '''save model for eval'''
-    ckpt_name = '/captcha_epoch_{}.pth'.format(epoch)
+    ckpt_name = '/cell_epoch_{}.pth'.format(epoch)
     path = args.output_path
     if not os.path.exists(path):
         os.mkdir(path)
@@ -81,10 +84,15 @@ print("train folder: {}".format(config.train_folder))
 print("test folder: {}".format(config.test_folder))
 
 # prepare the loss
-criterion = nn.CTCLoss()
+criterion = nn.CTCLoss(zero_infinity=True)
 
 # prepare the network
-net =Simple_CRNN(len(config.alphabets),input_channels=3, hidden_unit=128)
+random.seed(config.random_seed)
+np.random.seed(config.random_seed)
+torch.manual_seed(config.random_seed)
+# net =Cell_CRNN(len(config.alphabets),input_channels=3, hidden_unit=128)
+net =Simple_CRNN(len(config.alphabets),input_channels=1, hidden_unit=128)
+#net = VGG16_CRNN(len(config.alphabets))
 
 # prepare the optim
 #optimizer = torch.optim.SGD(net.parameters(),args.lr)
@@ -122,24 +130,24 @@ def train_epoch(net, epoch):
             optimizer.zero_grad()
             outputs = net(data)
             l_outputs, b, p = outputs.size()
-            loss = criterion(outputs, label,torch.IntTensor([l_outputs]*b), torch.IntTensor([l_lables]*b))
+            #loss = criterion(outputs, label,torch.IntTensor([l_outputs]*b), torch.IntTensor([l_lables]*b))
+            label_length = torch.IntTensor(label_length)
+            loss = criterion(outputs, label, torch.IntTensor([l_outputs] * b), label_length)
             loss.backward()
             epoch_loss += loss.item()
             avg_loss.add(loss / b)
             optimizer.step()
 
-            # if index % config.display_interval == 0:
-            #     print("epoch:{} {}/{}  loss:{}".format(e, index, len(train_loader),avg_loss.val()))
-            #     avg_loss.reset()
-
-            # evaluate the accuracy
-            gt = label.view(-1).detach().cpu().numpy()
-            gt = alphabets.encode(gt)
-            gt_list = list()
-            step = 4
-            for index in range(len(label_length)):
-                gt_list.append(gt[index*step:(index+1)*step])
+            # evaluate the acc
+            # decode the predict result
             predict_labels = tensor_process.post_process_batch(outputs)
+            # decode the gt
+            gt_list = list()
+            label = label.detach().cpu().numpy()
+            for item in label[:, ]:
+                gt = alphabets.encode2(item)
+                gt_list.append(gt)
+            # compare gt and predict
             correct_count += compare_str_list(gt_list, predict_labels)
             total_count += len(gt_list)
         eval_acc = eval_batch(net,e,test_loader_batch)
@@ -161,9 +169,12 @@ def eval(net, epoch):
         predict = tensor_process.post_process(outputs)
         gt = label.view(-1).detach().cpu().numpy()
         gt = alphabets.encode(gt)
+        gt = gt[0:label_length[0]]
+        # print("gt:{} *** predict:{} *** equal:{}".format(gt,predict, gt==predict))
         if predict == gt:
             correct += 1
-    print("epoch: {}, eval acc: {}".format(epoch, float(correct)/len(test_loader)))
+    #print("epoch: {}, eval acc: {}".format(epoch, float(correct)/len(test_loader)))
+    return float(correct)/len(test_loader)
 
 def eval_batch(net,epoch,loader):
     net.eval()
@@ -174,23 +185,51 @@ def eval_batch(net,epoch,loader):
         data = Variable(tensor_to_device(data))
         label = Variable(tensor_to_device(label)).int()
         outputs = net(data)
-        predict_labels = tensor_process.post_process_batch(outputs)
-        gt = label.view(-1).detach().cpu().numpy()
-        gt = alphabets.encode(gt)
+        # decode the predict result
+        predict = tensor_process.post_process_batch(outputs)
+        # decode the gt
         gt_list = list()
-        step = 4
-        for index in range(len(label_length)):
-            gt_list.append(gt[index * step:(index + 1) * step])
-        correct += compare_str_list(gt_list, predict_labels)
+        label = label.detach().cpu().numpy()
+        for item in label[:,]:
+            gt=alphabets.encode2(item)
+            gt_list.append(gt)
+        # compare gt and predict
+        correct += compare_str_list(gt_list, predict)
         total_count += len(gt_list)
     return float(correct)/total_count
+
+def eval_error(net, epoch):
+    net.eval()
+    net = model_to_device(net)
+    correct = 0
+    for index, (data, label, label_length) in enumerate(test_loader):
+        data = Variable(tensor_to_device(data))
+        label = Variable(tensor_to_device(label)).int()
+        outputs = net(data)
+        predict = tensor_process.post_process(outputs)
+        gt = label.view(-1).detach().cpu().numpy()
+        gt = alphabets.encode(gt)
+        gt = gt[0:label_length[0]]
+        # print("gt:{} *** predict:{} *** equal:{}".format(gt,predict, gt==predict))
+        if predict == gt:
+            correct += 1
+        else:
+            print("gt:{} *** predict:{} *** equal:{}".format(gt, predict, gt == predict))
+    #print("epoch: {}, eval acc: {}".format(epoch, float(correct)/len(test_loader)))
+    return float(correct)/len(test_loader)
 
 def main():
     if config.resume_model:
         resume_model(net, config.resume_model)
-    else:
-        net.apply(init_weights)
     train_epoch(net,config.epoch)
 
+# if __name__ == "__main__":
+#     main()
+
 if __name__ == "__main__":
-    main()
+    resume_model(net, config.resume_model)
+    # eval_1 = eval(net,0)
+    # eval_batch = eval_batch(net,0,test_loader_batch)
+    # print("eval_1: {}".format(eval_1))
+    # print("eval_batch: {}".format(eval_batch))
+    eval_error(net,0)

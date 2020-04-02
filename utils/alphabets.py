@@ -23,6 +23,13 @@ class Alphabets(object):
             data.append(self.num2str[int(num)])
         return ''.join(data)
 
+    def encode2(self,nums):
+        length = list(nums)
+        data = []
+        for i, num in enumerate(nums):
+            data.append(self.num2str[int(num)])
+        return ''.join(data).replace(' ','')
+
 class Alphabets_Chinese(object):
     def __init__(self, alphabets_str):
         self.alphabets_str = alphabets_str

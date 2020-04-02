@@ -39,7 +39,7 @@ def CV2_showPILImages(*imgs,timeout=1000):
     cv2.imshow("test", img_show)
     cv2.waitKey(timeout)
 
-def CV2_showTensors(*tensors, timeout=1000):
+def CV2_showTensors(*tensors, timeout=1000,direction=0):
     first_image = True
     img_show = None
     for item in tensors:
@@ -49,7 +49,10 @@ def CV2_showTensors(*tensors, timeout=1000):
             img_show = item
             first_image = False
         else:
-            img_show = np.hstack((img_show, item))
+            if direction == 0:
+                img_show = np.hstack((img_show, item))
+            else:
+                img_show = np.vstack((img_show, item))
     cv2.imshow("CV2_show", img_show)
     cv2.waitKey(timeout)
 
@@ -64,6 +67,22 @@ def CV2_showTensors_unsqueeze(tensors, timeout=1000):
             first_image = False
         else:
             img_show = np.hstack((img_show, item))
+    cv2.imshow("CV2_show", img_show)
+    cv2.waitKey(timeout)
+
+def CV2_showTensors_unsqueeze_gray(tensors, timeout=1000,direction=0):
+    first_image = True
+    img_show = None
+    for item in tensors:
+        item = item.data.cpu().numpy().transpose(1,2,0)
+        if first_image:
+            img_show = item
+            first_image = False
+        else:
+            if direction == 0:
+                img_show = np.hstack((img_show, item))
+            else:
+                img_show = np.vstack((img_show, item))
     cv2.imshow("CV2_show", img_show)
     cv2.waitKey(timeout)
 

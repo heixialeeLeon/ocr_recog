@@ -10,8 +10,8 @@ random_seed = 1111
 image_input_size = (160,32)
 
 # train related parameters
-#resume_model ='checkpoint/recog_epoch_700.pth'
-resume_model =''
+resume_model ='checkpoint/recog_chinese.pth'
+#resume_model =''
 epoch = 100
 lr = 0.0001
 step = [5, 20, 30]

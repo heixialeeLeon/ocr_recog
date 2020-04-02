@@ -54,7 +54,7 @@ if __name__ == "__main__":
                               collate_fn=default_collate_fn)
     for data, label, label_length in train_loader:
         images = [item for item in data[:, ]]
-        #CV2_showTensors_unsqueeze(images)
+        CV2_showTensors_unsqueeze_gray(images)
         #CV2_showTensors(img)
         print(data.shape)
         #print(label.shape)

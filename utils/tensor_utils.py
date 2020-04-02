@@ -33,6 +33,8 @@ def compare_str_list(label_a, label_b):
     correct_count = 0
     assert(len(label_a) == len(label_b))
     for index in range(len(label_a)):
+        # print("gt: {}".format(label_b[index]))
+        # print("predict: {}".format(label_a[index]))
         if label_a[index] == label_b[index]:
             correct_count +=1
     return correct_count
