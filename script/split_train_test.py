@@ -32,8 +32,8 @@ if __name__ == "__main__":
     # train_folder = "/data/captcha/huahang/train"
     # test_folder = "/data/captcha/huahang/test"
     # src_folder = "/data/captcha/航华验证码"
-    train_folder = "/home/peizhao/data/work/cell/cell_train"
-    test_folder = "/home/peizhao/data/work/cell/cell_test"
-    src_folder = "/home/peizhao/data/work/cell/cell_data"
-    split_train_test(src_folder,train_folder,test_folder)
+    train_folder = "/home/peizhao/data/work/cell/0403/cell_train"
+    test_folder = "/home/peizhao/data/work/cell/0403/cell_test"
+    src_folder = "/home/peizhao/data/work/cell/0403/raw_data"
+    split_train_test(src_folder,train_folder,test_folder,0.95)
 

@@ -1,22 +1,26 @@
 alphabets = ' 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#/_'
 #image_folder = '/data/vott-csv-export'
 #image_folder = '/data/captcha/航华验证码'
-train_folder = '/home/peizhao/data/work/cell/cell_train'
-test_folder = '/home/peizhao/data/work/cell/cell_test'
+train_folder = '/home/peizhao/data/work/cell/0403/cell_train'
+#test_folder = '/home/peizhao/data/work/cell/0403/cell_test'
+test_folder = '/home/peizhao/data/work/cell/temp'
 # train_folder = '/data/captcha/train_total'
 # test_folder = '/data/captcha/huahang/test'
 train_test_rate = 0.9
-image_input_size = (200,20)
+image_input_size = (320,32)
 #image_input_size = (150,53)
 
 random_seed = 1111
 
 #resume_model ='checkpoint/recog_v2.pth'
-resume_model ='checkpoint/cell_epoch_200.pth'
-#resume_model =''
-
+#resume_model ='checkpoint_cell/cell_simple_crnn_v0.pth'
+#resume_model ='checkpoint_cell/cell_simple_crnn_v2.pth'
+#resume_model ='checkpoint/cell_epoch_10.pth'
+resume_model ='checkpoint_cell/cell_v0.pth'
 
 #trainning parameters
-epoch = 300
-lr = 0.00001
-step = [50,100,200]
+epoch = 100
+lr = 0.0001
+step = [20,40,80]
+save_per_epoch=5
+batch_size =32

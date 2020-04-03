@@ -16,28 +16,30 @@ from models.cell_rcnn import Cell_CRNN, init_weights
 from models.simple_crnn import Simple_CRNN
 from models.vgg16_crnn import VGG16_CRNN
 from utils.alphabets import Alphabets
+from utils.img_show import *
 from utils.tensor_utils import *
 from utils.train_utils import *
 #import configs as config
 import config.config_cell as config
 import random
-
+from tqdm import *
 
 parser = argparse.ArgumentParser(description='Train Super Resolution Models')
 # training parameters
 # parser.add_argument("--image_size", type=int, default=256,help="training patch size")
-parser.add_argument("--data_dir", type=str, default="/data/captcha/330/train",help="data dir location")
-parser.add_argument("--batch_size", type=int, default=8,help="batch size")
-parser.add_argument("--epochs", type=int, default=300,help="number of epochs")
-parser.add_argument("--save_per_epoch", type=int, default=50,help="number of epochs")
-parser.add_argument("--lr", type=float, default=0.001, help="learning rate")
+parser.add_argument("--train_dir", type=str, default=config.train_folder,help="train data dir location")
+parser.add_argument("--test_dir", type=str, default=config.test_folder,help="test data dir location")
+parser.add_argument("--batch_size", type=int, default=config.batch_size,help="batch size")
+parser.add_argument("--epochs", type=int, default=config.epoch,help="number of epochs")
+parser.add_argument("--save_per_epoch", type=int, default=config.save_per_epoch,help="number of epochs")
+parser.add_argument("--lr", type=float, default=config.lr, help="learning rate")
 parser.add_argument("--steps_show", type=int, default=100,help="steps per epoch")
 parser.add_argument("--scheduler_step", type=int, default=10,help="scheduler_step for epoch")
 parser.add_argument("--weight", type=str, default=None,help="weight file for restart")
 parser.add_argument("--output_path", type=str, default="checkpoint",help="checkpoint dir")
 parser.add_argument("--devices", type=str, default="cuda",help="device description")
 parser.add_argument("--image_channels", type=int, default=3,help="batch image_channels")
-parser.add_argument("--resume_model", type=str, default='checkpoint/recog_v1.pth', help="resume model path")
+parser.add_argument("--resume_model", type=str, default=config.resume_model, help="resume model path")
 
 args = parser.parse_args()
 print(args)
@@ -62,7 +64,7 @@ def save_model(model,epoch):
     torch.save(model.state_dict(), path_final)
 
 def resume_model(model, model_path):
-    print("Resume model from {}".format(config.resume_model))
+    print("Resume model from {}".format(args.resume_model))
     model.load_state_dict(torch.load(model_path))
 
 def model_to_device(model):
@@ -75,13 +77,13 @@ def tensor_to_device(tensor):
     return tensor.to(device)
 
 # prepare the data
-train_dataset = DatasetFromFolder(config.train_folder)
-test_dataset = DatasetFromFolder(config.test_folder)
+train_dataset = DatasetFromFolder(args.train_dir,transform=input_transform)
+test_dataset = DatasetFromFolder(args.test_dir)
 train_loader = DataLoader(dataset=train_dataset, num_workers=4, batch_size=args.batch_size, shuffle=True, collate_fn=default_collate_fn)
 test_loader = DataLoader(dataset=test_dataset, num_workers=4, batch_size=1, shuffle=False, collate_fn=default_collate_fn)
 test_loader_batch = DataLoader(dataset=test_dataset, num_workers=4, batch_size=16, shuffle=True, collate_fn=default_collate_fn)
-print("train folder: {}".format(config.train_folder))
-print("test folder: {}".format(config.test_folder))
+# print("train folder: {}".format(config.train_folder))
+# print("test folder: {}".format(config.test_folder))
 
 # prepare the loss
 criterion = nn.CTCLoss(zero_infinity=True)
@@ -91,8 +93,8 @@ random.seed(config.random_seed)
 np.random.seed(config.random_seed)
 torch.manual_seed(config.random_seed)
 # net =Cell_CRNN(len(config.alphabets),input_channels=3, hidden_unit=128)
-net =Simple_CRNN(len(config.alphabets),input_channels=1, hidden_unit=128)
-#net = VGG16_CRNN(len(config.alphabets))
+#net =Simple_CRNN(len(config.alphabets),input_channels=1, hidden_unit=128)
+net = VGG16_CRNN(len(config.alphabets))
 
 # prepare the optim
 #optimizer = torch.optim.SGD(net.parameters(),args.lr)
@@ -121,6 +123,7 @@ def train_epoch(net, epoch):
         correct_count = 0
         total_count = 0
         avg_loss = averager()
+        pbar = tqdm(total=len(train_loader))
         for index, (data, label, label_length) in enumerate(train_loader):
             data = Variable(tensor_to_device(data))
             label = Variable(tensor_to_device(label)).int()
@@ -150,6 +153,10 @@ def train_epoch(net, epoch):
             # compare gt and predict
             correct_count += compare_str_list(gt_list, predict_labels)
             total_count += len(gt_list)
+
+            pbar.update(1)
+            # pbar.set_postfix_str("loss: {}".format(avg_loss.val()))
+        pbar.close()
         eval_acc = eval_batch(net,e,test_loader_batch)
         if index % 1 == 0:
             acc = float(correct_count)/total_count
@@ -215,6 +222,7 @@ def eval_error(net, epoch):
             correct += 1
         else:
             print("gt:{} *** predict:{} *** equal:{}".format(gt, predict, gt == predict))
+            CV2_showTensors_unsqueeze_gray(data,0)
     #print("epoch: {}, eval acc: {}".format(epoch, float(correct)/len(test_loader)))
     return float(correct)/len(test_loader)
 

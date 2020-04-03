@@ -1,6 +1,7 @@
 from pathlib import *
 from torch.utils.data.dataset import Dataset
 from torch.utils.data import DataLoader
+import torchvision.transforms as transforms
 from torchvision.transforms import Compose, RandomCrop, ToTensor, ToPILImage, CenterCrop, Resize
 import torch.nn.utils.rnn as rnn
 from utils.alphabets import Alphabets
@@ -9,18 +10,25 @@ from utils.file_utils import get_file_list
 from utils.list_utils import split_with_shuffle
 import config.config_cell as config
 
+default_input_transform = Compose([
+	ToTensor(),
+])
+
 input_transform = Compose([
+    transforms.ColorJitter(brightness=0.5,contrast=0.5,hue=0.5),
+    transforms.RandomAffine((-3,3)),
 	ToTensor(),
 	# Normalize([.485, .456, .406], [.229, .224, .225]),
 ])
 
 class DatasetFromFolder(Dataset):
-    def __init__(self, dataset_dir, size=config.image_input_size):
+    def __init__(self, dataset_dir, size=config.image_input_size, transform =default_input_transform):
         super(DatasetFromFolder, self).__init__()
         self.size = size
         self.image_filenames = Path(dataset_dir).rglob("*.png")
         self.image_filenames = [item for item in self.image_filenames]
         self.alphabets = Alphabets(config.alphabets)
+        self.transform = transform
 
     def __getitem__(self, index):
         target = str(self.image_filenames[index])
@@ -29,10 +37,8 @@ class DatasetFromFolder(Dataset):
         target = target.replace('$','/')
         image = cv2.imread(str(self.image_filenames[index]),0)
         image = cv2.resize(image,self.size)
-        h,w = image.shape
-        w = int(w * 0.6)
-        image = image[:,:w]
-        image = input_transform(image)
+        image = Image.fromarray(image, mode="L")
+        image = self.transform(image)
         #image = self.transform(Image.open(self.image_filenames[index]))
         target = torch.tensor(self.alphabets.decode(target))
         return image,target
@@ -76,7 +82,7 @@ def default_collate_fn(batch):
 # test_dataset = DatasetFromFolder(config.test_folder)
 
 if __name__ == "__main__":
-    dataset = DatasetFromFolder("/home/peizhao/data/work/cell/cell_train")
+    dataset = DatasetFromFolder("/home/peizhao/data/work/cell/0403/cell_test")
     train_loader = DataLoader(dataset=dataset, num_workers=4, batch_size=16, shuffle=True, collate_fn=default_collate_fn)
     for data, label, label_length in train_loader:
         images = [item for item in data[:, ]]

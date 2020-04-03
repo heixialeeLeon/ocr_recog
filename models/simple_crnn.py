@@ -81,11 +81,11 @@ def init_weights(m):
         m.bias.data.zero_()
 
 if __name__ == '__main__':
-    crnn = Simple_CRNN(63)
-    x = torch.zeros(8, 3, 20, 200)
-    # x = torch.zeros(8, 3, 53, 150)
-    output = crnn(x)
-    print(output.size())
+    # crnn = Simple_CRNN(63)
+    # x = torch.zeros(8, 3, 20, 200)
+    # # x = torch.zeros(8, 3, 53, 150)
+    # output = crnn(x)
+    # print(output.size())
 
     crnn = Simple_CRNN(63,1)
     x = torch.zeros(1, 1, 53, 150)
