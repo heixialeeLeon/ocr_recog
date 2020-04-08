@@ -11,7 +11,7 @@ import torchvision
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
-from dataset.dataset_syntheic_Chinese import *
+from datasets.dataset_syntheic_Chinese import *
 from models.vgg16_crnn import VGG16_CRNN, init_weights
 from utils.alphabets import *
 from utils.tensor_utils import *

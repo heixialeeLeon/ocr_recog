@@ -11,7 +11,7 @@ import torchvision
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
-from dataset.dataset import *
+from datasets.dataset import *
 from models.simple_crnn import Simple_CRNN, init_weights
 from utils.alphabets import Alphabets
 from utils.tensor_utils import *

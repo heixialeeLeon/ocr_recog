@@ -11,11 +11,13 @@ import torchvision
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
-from dataset.dataset_cell import *
+from datasets.dataset_cell import *
 from models.cell_rcnn import Cell_CRNN, init_weights
 from models.simple_crnn import Simple_CRNN
 from models.vgg16_crnn import VGG16_CRNN
-from utils.alphabets import Alphabets
+from models.resnet_crnn import Resnet_CRNN
+# from models.vgg16_crnn_2 import VGG16_CRNN_2 as VGG16_CRNN
+# from utils.alphabets import Alphabets
 from utils.img_show import *
 from utils.tensor_utils import *
 from utils.train_utils import *
@@ -27,7 +29,8 @@ class Predictor(object):
         self.alphabets = Alphabets(self.alphabets_set)
         self.device = device
         self.input_size = (320,32)
-        self.net = VGG16_CRNN(len(self.alphabets_set))
+        #self.net = VGG16_CRNN(len(self.alphabets_set))
+        self.net = Resnet_CRNN(len(self.alphabets_set),1)
         self.net.load_state_dict(torch.load(model_path))
         self.tensor_process = TensorProcess(self.alphabets)
         self.transform = default_input_transform
@@ -47,3 +50,14 @@ class Predictor(object):
         output = self.net(input)
         predict_result = self.tensor_process.post_process(output)
         return predict_result
+
+if __name__ == "__main__":
+    test_folder = "/home/peizhao/data/work/cell/temp1"
+    p = Predictor("checkpoint/cell_epoch_5.pth")
+    #p = Predictor("checkpoint_cell/cell_v1.pth")
+    for item in  Path(test_folder).rglob('*.png'):
+        im = cv2.imread(str(item),0)
+        result = p.predict(im)
+        print(result)
+        cv2.imshow("test",im)
+        cv2.waitKey(0)

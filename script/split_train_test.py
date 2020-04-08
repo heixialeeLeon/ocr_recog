@@ -6,7 +6,7 @@ from tqdm import *
 def split_train_test(src_folder, train_folder, test_folder,rate=0.9):
     image_files = os.listdir(src_folder)
     train, test = split_with_shuffle(image_files,rate)
-    print("start to copy train dataset")
+    print("start to copy train datasets")
     for index in tqdm(range(len(train))):
         src_file = os.path.join(src_folder,train[index])
         dst_file = os.path.join(train_folder,train[index])
@@ -16,7 +16,7 @@ def split_train_test(src_folder, train_folder, test_folder,rate=0.9):
     #     dst_file = os.path.join(train_folder,item)
     #     shutil.copyfile(src_file,dst_file)
 
-    print("start to copy test dataset")
+    print("start to copy test datasets")
     for index in tqdm(range(len(test))):
         src_file = os.path.join(src_folder,test[index])
         dst_file = os.path.join(test_folder,test[index])

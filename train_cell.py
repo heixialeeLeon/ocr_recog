@@ -11,10 +11,12 @@ import torchvision
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
-from dataset.dataset_cell import *
+from datasets.dataset_cell import *
 from models.cell_rcnn import Cell_CRNN, init_weights
 from models.simple_crnn import Simple_CRNN
 from models.vgg16_crnn import VGG16_CRNN
+from models.resnet_crnn import Resnet_CRNN
+#from models.vgg16_crnn_2 import VGG16_CRNN_2
 from utils.alphabets import Alphabets
 from utils.img_show import *
 from utils.tensor_utils import *
@@ -77,7 +79,7 @@ def tensor_to_device(tensor):
     return tensor.to(device)
 
 # prepare the data
-train_dataset = DatasetFromFolder(args.train_dir,transform=input_transform)
+train_dataset = DatasetFromFolder(args.train_dir,transform=input_transform,width_scale=True)
 test_dataset = DatasetFromFolder(args.test_dir)
 train_loader = DataLoader(dataset=train_dataset, num_workers=4, batch_size=args.batch_size, shuffle=True, collate_fn=default_collate_fn)
 test_loader = DataLoader(dataset=test_dataset, num_workers=4, batch_size=1, shuffle=False, collate_fn=default_collate_fn)
@@ -94,7 +96,9 @@ np.random.seed(config.random_seed)
 torch.manual_seed(config.random_seed)
 # net =Cell_CRNN(len(config.alphabets),input_channels=3, hidden_unit=128)
 #net =Simple_CRNN(len(config.alphabets),input_channels=1, hidden_unit=128)
-net = VGG16_CRNN(len(config.alphabets))
+#net = VGG16_CRNN(len(config.alphabets))
+#net = VGG16_CRNN_2(len(config.alphabets))
+net = Resnet_CRNN(len(config.alphabets),1)
 
 # prepare the optim
 #optimizer = torch.optim.SGD(net.parameters(),args.lr)
@@ -162,7 +166,7 @@ def train_epoch(net, epoch):
             acc = float(correct_count)/total_count
             print("epoch: {}/{}, loss:{}, train_acc:{}, eval_acc:{}, learning_rate: {}".format(e,epoch,epoch_loss,acc,eval_acc, get_learning_rate(optimizer)))
         scheduler.step()
-        if e % args.save_per_epoch == 0:
+        if e % args.save_per_epoch == 0 and e > 0:
             save_model(net,e)
 
 def eval(net, epoch):
@@ -231,13 +235,13 @@ def main():
         resume_model(net, config.resume_model)
     train_epoch(net,config.epoch)
 
-# if __name__ == "__main__":
-#     main()
-
 if __name__ == "__main__":
-    resume_model(net, config.resume_model)
-    # eval_1 = eval(net,0)
-    # eval_batch = eval_batch(net,0,test_loader_batch)
-    # print("eval_1: {}".format(eval_1))
-    # print("eval_batch: {}".format(eval_batch))
-    eval_error(net,0)
+    main()
+
+# if __name__ == "__main__":
+#     resume_model(net, config.resume_model)
+#     # eval_1 = eval(net,0)
+#     # eval_batch = eval_batch(net,0,test_loader_batch)
+#     # print("eval_1: {}".format(eval_1))
+#     # print("eval_batch: {}".format(eval_batch))
+#     eval_error(net,0)
