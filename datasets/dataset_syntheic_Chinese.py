@@ -7,7 +7,9 @@ from utils.alphabets import Alphabets
 from utils.img_show import *
 from utils.file_utils import get_file_list
 from utils.list_utils import split_with_shuffle
+from datasets.tools import PAD
 import config.config_syntheic_Chinese as config
+from utils.alphabets import Alphabets_Chinese
 import os
 
 input_transform = Compose([
@@ -30,7 +32,7 @@ class DatasetFromTextFile(Dataset):
         label = label.strip()
         file_name = os.path.join(self.image_folder,file_name)
         image = cv2.imread(file_name,0)
-        image = cv2.resize(image,self.size)
+        # image = cv2.resize(image,self.size)
         image = input_transform(image)
         target = torch.tensor(self.alphabets.decode(label))
         return image,target
@@ -46,16 +48,37 @@ def default_collate_fn(batch):
     data = torch.stack(data, dim=0)
     return data, padding_label, label_length
 
+class AlginCollate(object):
+    def __init__(self, img_h, img_w, channel=3):
+        self.pad = PAD((channel,img_h,img_w))
+
+    def __call__(self,batch):
+        data = [self.pad(item[0]) for item in batch]
+        # data = [item[0] for item in batch]
+        label = [item[1] for item in batch]
+        label_length = [len(item) for item in label]
+        padding_label = rnn.pad_sequence(label, batch_first=True, padding_value=0)
+        data = torch.stack(data, dim=0)
+        return data, padding_label, label_length
+
 train_dataset = DatasetFromTextFile(config.train_file_list)
 test_dataset = DatasetFromTextFile(config.test_file_list)
+align_collate = AlginCollate(config.image_input_size[1],config.image_input_size[0],1)
 
 if __name__ == "__main__":
-    train_loader = DataLoader(dataset=test_dataset, num_workers=4, batch_size=8, shuffle=False,
-                              collate_fn=default_collate_fn)
+    alphabets = Alphabets_Chinese(config.alphabets)
+    train_loader = DataLoader(dataset=test_dataset, num_workers=4, batch_size=8, shuffle=True,
+                              collate_fn=align_collate)
     for data, label, label_length in train_loader:
         images = [item for item in data[:, ]]
-        CV2_showTensors_unsqueeze_gray(images)
-        #CV2_showTensors(img)
-        print(data.shape)
-        #print(label.shape)
+        gt_list = list()
+        label = label.detach().cpu().numpy()
+        for item in label[:, ]:
+            gt = alphabets.encode(item)
+            gt =''.join(gt).replace('~', '')
+            gt_list.append(gt)
+        print(gt_list)
+        CV2_showTensors_unsqueeze_gray(images,direction=1,timeout=0)
+        # print(data.shape)
+        # print(label.shape)
         #print(label_length)

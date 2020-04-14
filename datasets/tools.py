@@ -16,7 +16,8 @@ class PAD(object):
 
     def __call__(self, tensor):
         c, h, w = tensor.shape
-        pad_tensor = torch.FloatTensor(*self.max_size).fill_(0)
+        pad_tensor = torch.FloatTensor(*self.max_size).fill_(1)
+        # pad_tensor = torch.FloatTensor(*self.max_size).fill_(0)
         pad_tensor[:, :, :w] =  tensor # right pad
         return pad_tensor
 
