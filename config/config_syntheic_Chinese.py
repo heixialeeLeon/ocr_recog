@@ -16,7 +16,7 @@ image_input_size = (960,32)
 
 # train related parameters
 #resume_model ='checkpoint_ch/cn_v0.pth'
-resume_model =''
+resume_model ='checkpoint/recog_epoch_10.pth'
 
 batch_size= 32
 epoch = 50

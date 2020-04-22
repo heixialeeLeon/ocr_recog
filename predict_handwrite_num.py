@@ -14,7 +14,7 @@ from models.resnet_crnn import Resnet_CRNN
 from utils.alphabets import *
 from utils.tensor_utils import *
 from datasets.tools import PAD
-import config.config_syntheic_Chinese as config
+import config.config_handwrite_nums as config
 import random
 import numpy as np
 import cv2
@@ -46,7 +46,7 @@ def predict(net, image_file):
     image = cv2.resize(image,None,fx=scale, fy=scale)
     #image = cv2.resize(image, config.image_input_size)
     input = input_transform(image)
-    input = pad(input)
+    #input = pad(input)
     input = torch.unsqueeze(input,dim=0)
     input = Variable(input).to(device)
     output = net(input)
@@ -58,8 +58,9 @@ if __name__ == "__main__":
     from pathlib import Path
     #resume_model(net,"checkpoint_ch/cn_v0.pth")
     #resume_model(net,"checkpoint_ch/vgg16_v0.pth")
-    resume_model(net, "checkpoint/recog_epoch_14.pth")
-    image_files = Path('/home/peizhao/data/ocr/generate_1/sample1').rglob("*.png")
+    #resume_model(net, "checkpoint_handwrite/resnet.pth")
+    resume_model(net, "checkpoint/recog_epoch_20.pth")
+    image_files = Path('/home/peizhao/data/ocr/handwrite/real_data').glob("*.png")
     for item in image_files:
         image, result = predict(net,str(item))
         print("predict: {}, file:{}".format(result, item))

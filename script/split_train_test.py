@@ -45,7 +45,11 @@ def split_train_test_label(label_file, output_folder, rate=0.9):
 #     split_train_test(src_folder,train_folder,test_folder,0.95)
 
 if __name__ == "__main__":
-    label_file = "/home/peizhao/data/ocr/generate_1/label/label.txt"
-    output_folder = "/home/peizhao/data/ocr/generate_1/label"
+    # label_file = "/home/peizhao/data/ocr/generate_1/label/label.txt"
+    # output_folder = "/home/peizhao/data/ocr/generate_1/label"
+    # label_file = "/home/peizhao/data/ocr/English/gen_eng/label/label.txt"
+    # output_folder = "/home/peizhao/data/ocr/English/gen_eng/label"
+    label_file = "/home/peizhao/data/ocr/handwrite/company/label/label.txt"
+    output_folder = "/home/peizhao/data/ocr/handwrite/company/label"
     split_train_test_label(label_file,output_folder,rate=0.95)
 
