@@ -106,3 +106,4 @@ ENV/
 checkout/
 model/
 weights/
+3rdparty/
