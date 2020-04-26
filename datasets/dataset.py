@@ -1,13 +1,12 @@
 from pathlib import *
 from torch.utils.data.dataset import Dataset
 from torch.utils.data import DataLoader
-from torchvision.transforms import Compose, RandomCrop, ToTensor, ToPILImage, CenterCrop, Resize
+from torchvision.transforms import Compose, ToTensor
 import torch.nn.utils.rnn as rnn
 from utils.alphabets import Alphabets
 from utils.img_show import *
-from utils.file_utils import get_file_list
-from utils.list_utils import split_with_shuffle
 import configs as config
+from lib.utils import view
 
 input_transform = Compose([
 	ToTensor(),
@@ -73,10 +72,14 @@ def default_collate_fn(batch):
 
 if __name__ == "__main__":
     dataset = DatasetFromFolder("/data/captcha/train_total")
-    train_loader = DataLoader(dataset=dataset, num_workers=4, batch_size=8, shuffle=True, collate_fn=default_collate_fn)
+    train_loader = DataLoader(dataset=dataset, num_workers=1, batch_size=8, shuffle=True, collate_fn=default_collate_fn)
     for data, label, label_length in train_loader:
         images = [item for item in data[:, ]]
-        CV2_showTensors_unsqueeze(images)
+        #CV2_showTensors_unsqueeze(images)
+        #print(data.shape)
+        view.show_tensor(images)
+        #CV2_showTensors(data)
+        #show_tensor(images)
         # print(data.shape)
         # print(label.shape)
         # print(label_length)

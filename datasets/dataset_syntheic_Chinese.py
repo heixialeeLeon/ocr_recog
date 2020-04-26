@@ -11,6 +11,7 @@ from datasets.tools import PAD
 import config.config_syntheic_Chinese as config
 from utils.alphabets import Alphabets_Chinese
 import os
+from lib.utils import view
 
 input_transform = Compose([
 	ToTensor(),
@@ -78,7 +79,8 @@ if __name__ == "__main__":
             gt =''.join(gt).replace('~', '')
             gt_list.append(gt)
         print(gt_list)
-        CV2_showTensors_unsqueeze_gray(images,direction=1,timeout=0)
+        #CV2_showTensors_unsqueeze_gray(images,direction=1,timeout=0)
+        view.show_tensor(images, direction=view.DIRECTION_VERTICAL, timeout=0)
         # print(data.shape)
         # print(label.shape)
         #print(label_length)

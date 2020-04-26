@@ -1,3 +1,3 @@
-[submodule "tools/utils"]
-	path = tools/utils
+[submodule "lib/utils"]
+	path = lib/utils
 	url = https://github.com/heixialeeLeon/utils.git
