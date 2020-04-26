@@ -138,9 +138,9 @@ def train_epoch(net, epoch):
             epoch_loss += loss.item()
             avg_loss.add(loss/b)
 
-            # if index % config.display_interval == 0:
-            #     print("epoch:{} {}/{}  loss:{}".format(e, index, len(train_loader),avg_loss.val()))
-            #     avg_loss.reset()
+            if index % config.display_interval == 0:
+                pbar.set_description("loss: {}".format(avg_loss.val()))
+                avg_loss.reset()
 
             optimizer.step()
             # evaluate the accuracy　

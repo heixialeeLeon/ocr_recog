@@ -67,7 +67,7 @@ align_collate = AlginCollate(config.image_input_size[1],config.image_input_size[
 
 if __name__ == "__main__":
     alphabets = Alphabets_Chinese(config.alphabets)
-    train_loader = DataLoader(dataset=test_dataset, num_workers=4, batch_size=8, shuffle=True,
+    train_loader = DataLoader(dataset=train_dataset, num_workers=4, batch_size=8, shuffle=True,
                               collate_fn=align_collate)
     for data, label, label_length in train_loader:
         images = [item for item in data[:, ]]

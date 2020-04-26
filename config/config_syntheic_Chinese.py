@@ -6,9 +6,9 @@ alphabets = """~ 某乃菽赅鲍堌窟千嗡持补嚅厍珪郈贱谅邻嬗絷塩
 # image_folder = '/data/Syntheic_Chinese/images'
 # train_file_list = '/data/Syntheic_Chinese/train.txt'
 # test_file_list = '/data/Syntheic_Chinese/test.txt'
-image_folder = '/home/peizhao/data/ocr/generate_1/data'
-train_file_list = '/home/peizhao/data/ocr/generate_1/label/train.txt'
-test_file_list = '/home/peizhao/data/ocr/generate_1/label/test.txt'
+image_folder = '/home/peizhao/data/ocr/generate_3/data'
+train_file_list = '/home/peizhao/data/ocr/generate_3/label/train.txt'
+test_file_list = '/home/peizhao/data/ocr/generate_3/label/test.txt'
 random_seed = 1111
 
 # image_input_size = (160,32)

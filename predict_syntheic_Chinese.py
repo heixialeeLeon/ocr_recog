@@ -58,7 +58,8 @@ if __name__ == "__main__":
     from pathlib import Path
     #resume_model(net,"checkpoint_ch/cn_v0.pth")
     #resume_model(net,"checkpoint_ch/vgg16_v0.pth")
-    resume_model(net, "checkpoint/recog_epoch_14.pth")
+    #resume_model(net, "checkpoint/recog_epoch_14.pth")
+    resume_model(net, "checkpoint_ch/resnet_v1.pth")
     image_files = Path('/home/peizhao/data/ocr/generate_1/sample1').rglob("*.png")
     for item in image_files:
         image, result = predict(net,str(item))

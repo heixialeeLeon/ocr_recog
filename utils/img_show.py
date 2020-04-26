@@ -6,11 +6,19 @@ import cv2
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 import torchvision.transforms.functional as tvF
+from skimage import util
 import sys
 
 def CV2_showPILImage(pil_image, timeout =1000):
     cv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
     cv2.imshow("test",cv_image)
+    cv2.waitKey(timeout)
+
+def CV2_showPILImage_Float(pil_image, timeout=1000):
+    im = np.array(pil_image)
+    im = util.img_as_ubyte(im)
+    im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
+    cv2.imshow("test",im)
     cv2.waitKey(timeout)
 
 def CV2_showPILImage_List(imgs, timeout=1000):

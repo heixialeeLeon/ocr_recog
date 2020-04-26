@@ -138,9 +138,11 @@ def train_epoch(net, epoch):
             epoch_loss += loss.item()
             avg_loss.add(loss/b)
 
-            # if index % config.display_interval == 0:
-            #     print("epoch:{} {}/{}  loss:{}".format(e, index, len(train_loader),avg_loss.val()))
-            #     avg_loss.reset()
+            if index % config.display_interval == 0:
+                show_loss = "[loss:{0:<10}]".format(avg_loss.val())
+                pbar.set_description(show_loss)
+                #print("epoch:{} {}/{}  loss:{}".format(e, index, len(train_loader),avg_loss.val()))
+                avg_loss.reset()
 
             optimizer.step()
             # evaluate the accuracy　
@@ -214,7 +216,7 @@ def main():
     train_epoch(net,config.epoch)
 
 if __name__ == "__main__":
-    #main()
-    resume_model(net, config.resume_model)
-    eval(net,0)
+    main()
+    #resume_model(net, config.resume_model)
+    #eval(net,0)
     #print(eval_batch(net,0,test_loader_batch))
